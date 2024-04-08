@@ -102,7 +102,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <phase>install</phase>
+            <phase>package</phase>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
@@ -126,7 +126,7 @@
               <goal>launch4j</goal>
             </goals>
             <configuration>
-              <headerType>console</headerType>
+              <headerType>gui</headerType>
               <saveConfig>true</saveConfig>
               <outfile>${project.build.directory}/${project.name}.exe</outfile>
               <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
@@ -161,6 +161,29 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>compile-inno-setup</id>
+            <phase>install</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>D:\Inno Setup 5\ISCC.exe</executable>
+              <workingDirectory>${project.basedir}</workingDirectory>
+              <arguments>
+                <argument>${project.basedir}\installer\TranslationUpdaterInstaller.iss</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 

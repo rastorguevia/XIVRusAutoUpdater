@@ -28,6 +28,10 @@ public class App {
     private static final Pattern pattern = Pattern.compile("\\D*([.\\d]+\\w?).*");
 
     public static void main(String[] args) {
+
+        //Arrays.stream(args).toList().forEach(log::info);
+
+
         long timer = System.nanoTime();
         long startTimer = System.nanoTime();
         try {
@@ -157,6 +161,7 @@ public class App {
 
     //TODO сделать прием файлов через вар арги
     //TODO добавить виндовые уведомления FXTrayIcon
-    //TODO добавить настроечный файл для включения реима отладки - всегда скачивать новый файл
+    //TODO добавить настроечный файл для включения режима отладки - всегда скачивать новый файл
+    //TODO проверить чтобы конечная папка с переводом не менялась на мелкий шрифт
 
 }
