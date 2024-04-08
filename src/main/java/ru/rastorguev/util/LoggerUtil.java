@@ -3,11 +3,14 @@ package ru.rastorguev.util;
 import ru.rastorguev.exception.LogfileException;
 import ru.rastorguev.exception.UtilitarianClassException;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.logging.*;
+
+import static ru.rastorguev.dto.constant.Constants.PROGRAM_DIR;
 
 public class LoggerUtil {
 
@@ -26,7 +29,7 @@ public class LoggerUtil {
         log.addHandler(ch);
 
         try {
-            var fh = new FileHandler(new SimpleDateFormat("d-M_HH_mm_ss").format(Calendar.getInstance().getTime()) + ".log");
+            var fh = new FileHandler(new File(System.getProperty(PROGRAM_DIR)).getAbsolutePath() + new SimpleDateFormat("d_M_y_HH_mm_ss").format(Calendar.getInstance().getTime()) + ".log");
             fh.setFormatter(getFormatter());
             log.addHandler(fh);
         } catch (IOException e) {

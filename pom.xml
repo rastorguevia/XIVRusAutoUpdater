@@ -4,30 +4,22 @@
 
   <groupId>ru.rastorguev</groupId>
   <artifactId>ff14-ru-translation-auto-updater</artifactId>
+  <name>TranslationUpdater</name>
   <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <description>Automatic update tool for unofficial Russian localization FINAL FANTASY XIV (XIV Rus)</description>
 
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <inceptionYear>2024</inceptionYear>
-
   <organization>
-    <name>Milky Mommies</name>
+    <name>FF14 RU TRANSLATION UPDATER</name>
   </organization>
-
+  <inceptionYear>2024</inceptionYear>
 
   <properties>
     <encoding>UTF-8</encoding>
     <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
-    <project.exeName>TranslationUpdater</project.exeName>
+
 
     <maven.compiler.failOnWarning>true</maven.compiler.failOnWarning>
     <maven.compiler.release>22</maven.compiler.release>
@@ -55,6 +47,17 @@
       <version>2.16.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.25</version>
+    </dependency>
 
   </dependencies>
 
@@ -125,9 +128,9 @@
               <goal>launch4j</goal>
             </goals>
             <configuration>
-              <headerType>gui</headerType>
+              <headerType>console</headerType>
               <saveConfig>true</saveConfig>
-              <outfile>${project.build.directory}/${project.exeName}.exe</outfile>
+              <outfile>${project.build.directory}/${project.name}.exe</outfile>
               <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
 <!--              <jar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</jar>-->
               <icon>${project.basedir}/src/main/resources/favicon.ico</icon>
@@ -146,15 +149,15 @@
               <versionInfo>
                 <fileVersion>1.0.0.0</fileVersion>
                 <txtFileVersion>1.0.0</txtFileVersion>
-                <fileDescription>${description}</fileDescription>
+                <fileDescription>${project.description}</fileDescription>
                 <copyright>The developer is not connected in any way with the XIV Rus and SQUARE ENIX team. All rights belong to their owners.</copyright>
                 <productVersion>1.0.0.0</productVersion>
                 <txtProductVersion>1.0.0</txtProductVersion>
-                <productName>ff14-ru-translation-auto-updater</productName>
-                <companyName>Mommy Milkers</companyName>
-                <internalName>ff14-ru-translation-auto-updater</internalName>
-                <originalFilename>TranslationUpdater.exe</originalFilename>
-                <trademarks>Mommy Milkers</trademarks>
+                <productName>${project.name}</productName>
+                <companyName>${project.organization.name}</companyName>
+                <internalName>${project.artifactId}</internalName>
+                <originalFilename>${project.name}.exe</originalFilename>
+                <trademarks>All rights belong to their owners.</trademarks>
                 <language>RUSSIAN</language>
               </versionInfo>
 

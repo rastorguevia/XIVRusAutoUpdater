@@ -22,15 +22,13 @@ import static ru.rastorguev.util.LoggerUtil.log;
 
 public class App {
 
-
-
     public static void main(String[] args) {
 
         try {
             final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
             var versionTagGithub = (String) jsonLatestGithubRelease.get(GITHUB_TAG);
             versionTagGithub = versionTagGithub.startsWith("v") ? versionTagGithub.substring(1) : versionTagGithub;
-            log.info(versionTagGithub);
+            log.fine(versionTagGithub);
 
             final var programDir = new File(System.getProperty(PROGRAM_DIR));
 
@@ -44,7 +42,7 @@ public class App {
             if (!localVersion.contains(versionTagGithub)) {
                 final var releaseZipFile = new File(programDir + RELEASE_ZIP);
 
-                saveNewFile(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
+                downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
                 log.info("Архив новой версии перевода сохранен");
 
                 deleteDirectory(translationFolder);
@@ -82,8 +80,8 @@ public class App {
                         "Проверьте расположение средства для обновления, либо убедитесь в наличии папки с переводом."));
     }
 
-    public static JSONObject getJsonLatestGithubRelease(String url) throws IOException, URISyntaxException {
-        try (final var is = URL.of(new URI(url), null).openStream()) {
+    public static JSONObject getJsonLatestGithubRelease(String urlFrom) throws IOException, URISyntaxException {
+        try (final var is = URL.of(new URI(urlFrom), null).openStream()) {
             return new JSONObject(readAll(new InputStreamReader(is, StandardCharsets.UTF_8)));
         }
     }
@@ -108,8 +106,8 @@ public class App {
         }
     }
 
-    public static void saveNewFile(String url, Path destination) throws IOException, URISyntaxException {
-        try (final var is = URL.of(new URI(url), null).openStream()) {
+    public static void downloadTranslationRelease(String urlFrom, Path destination) throws IOException, URISyntaxException {
+        try (final var is = URL.of(new URI(urlFrom), null).openStream()) {
             Files.copy(is, destination, StandardCopyOption.REPLACE_EXISTING);
         }
     }
@@ -131,5 +129,6 @@ public class App {
 
     //TODO сделать прием файлов через вар арги
     //TODO добавить виндовые уведомления
+    //TODO асинхрон
 
 }
