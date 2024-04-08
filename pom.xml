@@ -50,13 +50,20 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
+      <version>2.0.12</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.25</version>
+      <version>2.0.12</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>
@@ -66,11 +73,10 @@
 
     <finalName>${project.artifactId}</finalName>
 
-
     <plugins>
 
+      <!-- Копируем JDK в target -->
       <plugin>
-        <!-- This copies the JRE used to do the build from java.home -->
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.6</version>
         <executions>
@@ -92,30 +98,32 @@
         </executions>
       </plugin>
 
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-shade-plugin</artifactId>-->
-<!--        <version>1.7.1</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <phase>package</phase>-->
-<!--            <goals>-->
-<!--              <goal>shade</goal>-->
-<!--            </goals>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--        <configuration>-->
-<!--          <shadedArtifactAttached>true</shadedArtifactAttached>-->
-<!--          <shadedClassifierName>shaded</shadedClassifierName>-->
-<!--          <transformers>-->
-<!--            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-<!--              <mainClass>ru.rastorguev.App</mainClass>-->
-<!--            </transformer>-->
-<!--          </transformers>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>ru.rastorguev.App</Main-Class>
+                    <Build-Number>1.0</Build-Number>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-      <!-- Create exe file -->
+      <!-- Создаем exe файл -->
       <plugin>
         <groupId>com.akathist.maven.plugins.launch4j</groupId>
         <artifactId>launch4j-maven-plugin</artifactId>
@@ -132,13 +140,11 @@
               <saveConfig>true</saveConfig>
               <outfile>${project.build.directory}/${project.name}.exe</outfile>
               <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
-<!--              <jar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</jar>-->
               <icon>${project.basedir}/src/main/resources/favicon.ico</icon>
               <manifest>${project.basedir}/src/main/resources/ignoreUAC.manifest</manifest>
               <classPath>
                 <mainClass>ru.rastorguev.App</mainClass>
                 <addDependencies>true</addDependencies>
-<!--                <jarLocation>${user.home}/lib</jarLocation>-->
               </classPath>
               <jre>
                 <minVersion>${maven.compiler.target}</minVersion>
@@ -160,7 +166,6 @@
                 <trademarks>All rights belong to their owners.</trademarks>
                 <language>RUSSIAN</language>
               </versionInfo>
-
             </configuration>
           </execution>
         </executions>

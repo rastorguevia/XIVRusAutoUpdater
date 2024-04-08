@@ -1,5 +1,6 @@
 package ru.rastorguev;
 
+import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.json.JSONObject;
 
@@ -13,54 +14,85 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.apache.commons.io.FileUtils.delete;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static ru.rastorguev.dto.constant.Constants.*;
-import static ru.rastorguev.util.LoggerUtil.log;
 
 
+@Slf4j
 public class App {
 
-    public static void main(String[] args) {
+    private static final Pattern pattern = Pattern.compile("\\D*([.\\d]+\\w?).*");
 
+    public static void main(String[] args) {
+        long timer = System.nanoTime();
+        long startTimer = System.nanoTime();
         try {
             final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
-            var versionTagGithub = (String) jsonLatestGithubRelease.get(GITHUB_TAG);
-            versionTagGithub = versionTagGithub.startsWith("v") ? versionTagGithub.substring(1) : versionTagGithub;
-            log.fine(versionTagGithub);
+
+            var versionTagGithub = pattern.matcher(jsonLatestGithubRelease.getString(GITHUB_TAG)).replaceFirst("$1").trim();
+            log.debug("Последняя версия с Github: {}", versionTagGithub);
 
             final var programDir = new File(System.getProperty(PROGRAM_DIR));
 
             final var translationFolder = getTranslationFolder(programDir);
-            log.fine(translationFolder.getName());
 
             final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
-            final var localVersion = jsonTranslationMeta.getString(META_JSON_VERSION);
-            log.fine(localVersion);
 
-            if (!localVersion.contains(versionTagGithub)) {
+            final var localVersion = pattern.matcher(jsonTranslationMeta.getString(META_JSON_VERSION)).replaceFirst("$1").trim();
+            log.debug("Локальная версия: {}", localVersion);
+
+            log.info("Проверка тегов версий: {} ms", getTimeConsumption(timer));
+            timer = System.nanoTime();
+
+            if (!localVersion.equals(versionTagGithub)) {
                 final var releaseZipFile = new File(programDir + RELEASE_ZIP);
 
-                downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
-                log.info("Архив новой версии перевода сохранен");
+                runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
 
-                deleteDirectory(translationFolder);
-                log.info("Предыдущая версия перевода удалена");
+                downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
+                log.info("Архив новой версии перевода сохранен: {} ms", getTimeConsumption(timer));
+                timer = System.nanoTime();
 
                 unzip(releaseZipFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME);
-                log.info("Новая версия перевода разархивирована в папку с модами");
+                log.info("Новая версия перевода разархивирована в папку с модами: {} ms", getTimeConsumption(timer));
+                timer = System.nanoTime();
 
                 delete(releaseZipFile);
-                log.info("Архив перевода удален");
-                log.info("Новая версия перевода " + versionTagGithub);
+                log.info("Архив перевода удален: {} ms", getTimeConsumption(timer));
+                log.info("Новая версия перевода: {}", versionTagGithub);
+
+                logWhatIsNew(jsonLatestGithubRelease);
 
             } else log.info("Нет новых обновлений");
 
         } catch (Exception e) {
-            log.severe(e.getMessage());
+            log.error("main", e);
+        } finally {
+            log.info("Завершение работы: {} ms", getTimeConsumption(startTimer));
         }
 
+    }
+
+    private static Long getTimeConsumption(long timer) {
+        return (System.nanoTime() - timer)/1000000;
+    }
+
+    private static void renameAndDeleteOldTranslation(File translationFolder) {
+        long timer = System.nanoTime();
+        var oldTranslationFolder = new File(translationFolder.getParent() + "/" + XIV_RU_FOLDER_NAME + "_old");
+        translationFolder.renameTo(oldTranslationFolder);
+
+        try {
+            deleteDirectory(oldTranslationFolder);
+        } catch (IOException e) {
+            log.error("Предыдущая версия перевода НЕ удалена");
+            return;
+        }
+        log.info("Предыдущая версия перевода удалена: {} ms", getTimeConsumption(timer));
     }
 
     private static File getTranslationMeta(File translationFolder) {
@@ -89,20 +121,18 @@ public class App {
     private static String readAll(Reader rd) throws IOException {
         final var sb = new StringBuilder();
         int cp;
+
         while ((cp = rd.read()) != -1) {
             sb.append((char) cp);
         }
-
         rd.close();
 
         return sb.toString();
     }
 
-    public static void unzip(String source, String destination) {
+    public static void unzip(String source, String destination) throws IOException {
         try (final var zip = new ZipFile(source)) {
             zip.extractAll(destination);
-        } catch (Exception e) {
-            log.severe(e.getMessage());
         }
     }
 
@@ -112,23 +142,21 @@ public class App {
         }
     }
 
-    //TODO доделать
-    public static void whatIsNew(JSONObject jsonLatestGithubRelease) {
-        var whatsNew = (String) jsonLatestGithubRelease.get("body");
+    public static void logWhatIsNew(JSONObject jsonLatestGithubRelease) {
+        log.info("_________________________________ \n");
+        log.info("Изменения:");
 
-        whatsNew = whatsNew.replace("**", "");
-        var splitedWhatsNew = Arrays.stream(whatsNew.split("\n")).toList();
+        Arrays.stream(jsonLatestGithubRelease.getString("body")
+                .replace("**", "")
+                .split("\n"))
+                .filter(str -> str.startsWith("*"))
+                .forEach(log::info);
 
-        log.info("\n" + whatsNew);
-        log.info("__________________________");
-
-        var sortedWhatsew = splitedWhatsNew.stream().filter(str -> str.startsWith("*")).toList();
-
-        sortedWhatsew.forEach(log::info);
+        log.info("\n");
+        log.info("Подробнее об изменениях на: https://xivrus.ru/download \n");
     }
 
     //TODO сделать прием файлов через вар арги
-    //TODO добавить виндовые уведомления
-    //TODO асинхрон
+    //TODO добавить виндовые уведомления FXTrayIcon
 
 }
