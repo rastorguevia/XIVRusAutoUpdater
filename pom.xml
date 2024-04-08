@@ -1,0 +1,168 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>ru.rastorguev</groupId>
+  <artifactId>ff14-ru-translation-auto-updater</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <description>Automatic update tool for unofficial Russian localization FINAL FANTASY XIV (XIV Rus)</description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <inceptionYear>2024</inceptionYear>
+
+  <organization>
+    <name>Milky Mommies</name>
+  </organization>
+
+
+  <properties>
+    <encoding>UTF-8</encoding>
+    <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
+    <project.exeName>TranslationUpdater</project.exeName>
+
+    <maven.compiler.failOnWarning>true</maven.compiler.failOnWarning>
+    <maven.compiler.release>22</maven.compiler.release>
+    <maven.compiler.source>22</maven.compiler.source>
+    <maven.compiler.target>22</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20240303</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.lingala.zip4j</groupId>
+      <artifactId>zip4j</artifactId>
+      <version>2.11.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.16.0</version>
+    </dependency>
+
+
+  </dependencies>
+
+
+  <build>
+
+    <finalName>${project.artifactId}</finalName>
+
+
+    <plugins>
+
+      <plugin>
+        <!-- This copies the JRE used to do the build from java.home -->
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/win32/java</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${java.home}</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-shade-plugin</artifactId>-->
+<!--        <version>1.7.1</version>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <phase>package</phase>-->
+<!--            <goals>-->
+<!--              <goal>shade</goal>-->
+<!--            </goals>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--        <configuration>-->
+<!--          <shadedArtifactAttached>true</shadedArtifactAttached>-->
+<!--          <shadedClassifierName>shaded</shadedClassifierName>-->
+<!--          <transformers>-->
+<!--            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+<!--              <mainClass>ru.rastorguev.App</mainClass>-->
+<!--            </transformer>-->
+<!--          </transformers>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
+
+      <!-- Create exe file -->
+      <plugin>
+        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+        <artifactId>launch4j-maven-plugin</artifactId>
+        <version>2.5.0</version>
+        <executions>
+          <execution>
+            <id>l4j-create-exe</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <headerType>gui</headerType>
+              <saveConfig>true</saveConfig>
+              <outfile>${project.build.directory}/${project.exeName}.exe</outfile>
+              <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
+<!--              <jar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</jar>-->
+              <icon>${project.basedir}/src/main/resources/favicon.ico</icon>
+              <manifest>${project.basedir}/src/main/resources/ignoreUAC.manifest</manifest>
+              <classPath>
+                <mainClass>ru.rastorguev.App</mainClass>
+                <addDependencies>true</addDependencies>
+<!--                <jarLocation>${user.home}/lib</jarLocation>-->
+              </classPath>
+              <jre>
+                <minVersion>${maven.compiler.target}</minVersion>
+                <path>./win32/java</path>
+                <requiresJdk>true</requiresJdk>
+                <requires64Bit>true</requires64Bit>
+              </jre>
+              <versionInfo>
+                <fileVersion>1.0.0.0</fileVersion>
+                <txtFileVersion>1.0.0</txtFileVersion>
+                <fileDescription>${description}</fileDescription>
+                <copyright>The developer is not connected in any way with the XIV Rus and SQUARE ENIX team. All rights belong to their owners.</copyright>
+                <productVersion>1.0.0.0</productVersion>
+                <txtProductVersion>1.0.0</txtProductVersion>
+                <productName>ff14-ru-translation-auto-updater</productName>
+                <companyName>Mommy Milkers</companyName>
+                <internalName>ff14-ru-translation-auto-updater</internalName>
+                <originalFilename>TranslationUpdater.exe</originalFilename>
+                <trademarks>Mommy Milkers</trademarks>
+                <language>RUSSIAN</language>
+              </versionInfo>
+
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
