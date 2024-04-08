@@ -152,11 +152,11 @@ public class App {
                 .filter(str -> str.startsWith("*"))
                 .forEach(log::info);
 
-        log.info("\n");
         log.info("Подробнее об изменениях на: https://xivrus.ru/download \n");
     }
 
     //TODO сделать прием файлов через вар арги
     //TODO добавить виндовые уведомления FXTrayIcon
+    //TODO добавить настроечный файл для включения реима отладки - всегда скачивать новый файл
 
 }
