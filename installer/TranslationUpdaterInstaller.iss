@@ -25,6 +25,7 @@ OutputBaseFilename={#AppName}Installer
 SetupIconFile={#ResourceDir}\target\classes\favicon.ico
 Compression=lzma
 SolidCompression=yes
+DisableProgramGroupPage=true
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
