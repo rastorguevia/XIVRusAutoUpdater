@@ -29,9 +29,6 @@ public class App {
 
     public static void main(String[] args) {
 
-        //Arrays.stream(args).toList().forEach(log::info);
-
-
         long timer = System.nanoTime();
         long startTimer = System.nanoTime();
         try {
@@ -158,17 +155,5 @@ public class App {
 
         log.info("Подробнее об изменениях на: https://xivrus.ru/download \n");
     }
-
-    //TODO сделать прием файлов через вар арги
-    //TODO добавить виндовые уведомления FXTrayIcon
-    //TODO добавить настроечный файл для включения режима отладки - всегда скачивать новый файл
-
-
-
-    //TODO проверить чтобы конечная папка с переводом не менялась на мелкий шрифт
-
-
-
-
 
 }
