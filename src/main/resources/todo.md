@@ -1,6 +1,9 @@
 * Сделать прием файлов через вар арги (open as) https://stackoverflow.com/questions/316204/how-to-set-an-application-as-the-default-program-of-opening-a-certain-type-of-fi
+* 
 * Drag and drop java fx ? https://www.youtube.com/watch?v=f7KGXUrAH0g
-* Добавить виндовые уведомления FXTrayIcon? https://stackoverflow.com/questions/34490218/how-to-make-a-windows-notification-in-java
+* Добавить виндовые уведомления FXTrayIcon? или так https://stackoverflow.com/questions/34490218/how-to-make-a-windows-notification-in-java
+* Как добавить JavaFX в обычный проект?
+* 
 * Добавить настроечный файл для включения режима отладки - всегда скачивать новый файл
 * Проверить чтобы конечная папка с переводом не менялась на мелкий шрифт - баг?
 * Профили для мавена чтобы не собирать каждый раз инсталлер

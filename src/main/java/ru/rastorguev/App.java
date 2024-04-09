@@ -14,18 +14,16 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.apache.commons.io.FileUtils.delete;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
+import static ru.rastorguev.util.PatternUtil.getVersionFrom;
 import static ru.rastorguev.dto.constant.Constants.*;
 
 
 @Slf4j
 public class App {
-
-    private static final Pattern pattern = Pattern.compile("\\D*([.\\d]+\\w?).*");
 
     public static void main(String[] args) {
 
@@ -33,17 +31,14 @@ public class App {
         long startTimer = System.nanoTime();
         try {
             final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
-
-            var versionTagGithub = pattern.matcher(jsonLatestGithubRelease.getString(GITHUB_TAG)).replaceFirst("$1").trim();
+            var versionTagGithub = getVersionFrom(jsonLatestGithubRelease.getString(GITHUB_TAG));
             log.debug("Последняя версия с Github: {}", versionTagGithub);
 
             final var programDir = new File(System.getProperty(PROGRAM_DIR));
-
             final var translationFolder = getTranslationFolder(programDir);
 
             final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
-
-            final var localVersion = pattern.matcher(jsonTranslationMeta.getString(META_JSON_VERSION)).replaceFirst("$1").trim();
+            final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
             log.debug("Локальная версия: {}", localVersion);
 
             log.info("Проверка тегов версий: {} ms", getTimeConsumption(timer));
@@ -153,7 +148,8 @@ public class App {
                 .filter(str -> str.startsWith("*"))
                 .forEach(log::info);
 
-        log.info("Подробнее об изменениях на: https://xivrus.ru/download \n");
+        log.info("Подробнее о проекте перевода: https://xivrus.ru/");
+        log.info("Об изменениях на Github странице проекта перевода: https://github.com/xivrus/xiv_ru_weblate/releases \n");
     }
 
 }
