@@ -9,8 +9,9 @@
 * Как создать автоматическое обновление для настольного приложения (GitHub Actions)https://design-hero.ru/articles/21297/   https://github.com/FranciscoDadone/JavaAutoUpdater
 
 
-
-
+* Inno Setup Github Action https://github.com/Minionguyjpro/Inno-Setup-Action
+* Java with Maven By GitHub Actions
+* Publish Java Package with Maven
 
 
 
