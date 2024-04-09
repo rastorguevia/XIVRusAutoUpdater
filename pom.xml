@@ -19,12 +19,13 @@
     <encoding>UTF-8</encoding>
     <project.build.sourceEncoding>${encoding}</project.build.sourceEncoding>
     <project.reporting.outputEncoding>${encoding}</project.reporting.outputEncoding>
-
-
     <maven.compiler.failOnWarning>true</maven.compiler.failOnWarning>
     <maven.compiler.release>22</maven.compiler.release>
     <maven.compiler.source>22</maven.compiler.source>
     <maven.compiler.target>22</maven.compiler.target>
+
+    <!--Прописать путь к ISCC.exe-->
+    <inno.exe.path>D:\Inno Setup 5\ISCC.exe</inno.exe.path>
   </properties>
 
   <dependencies>
@@ -68,13 +69,46 @@
 
   </dependencies>
 
+  <profiles>
+
+    <profile>
+      <id>compile-installer</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>compile-inno-setup</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${inno.exe.path}</executable>
+                  <workingDirectory>${project.basedir}</workingDirectory>
+                  <arguments>
+                    <argument>${project.basedir}\installer\TranslationUpdaterInstaller.iss</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+  </profiles>
 
   <build>
-
     <finalName>${project.artifactId}</finalName>
 
     <plugins>
-
       <!-- Копируем JDK в target -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
@@ -157,29 +191,6 @@
                 <trademarks>All rights belong to their owners.</trademarks>
                 <language>RUSSIAN</language>
               </versionInfo>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <id>compile-inno-setup</id>
-            <phase>install</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-        <!--      Прописать путь к ISCC.exe у себя в системе     -->
-              <executable>D:\Inno Setup 5\ISCC.exe</executable>
-              <workingDirectory>${project.basedir}</workingDirectory>
-              <arguments>
-                <argument>${project.basedir}\installer\TranslationUpdaterInstaller.iss</argument>
-              </arguments>
             </configuration>
           </execution>
         </executions>
