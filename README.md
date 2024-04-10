@@ -21,7 +21,7 @@
 * Inno Setup 5
 
 #### Если хотим собрать без установщика, запускаем
-```
+```console
 mvn clean install
 ```
 #### Если хотим собрать с установщиком, 
@@ -29,7 +29,7 @@ cначала указываем путь к ISCC.exe (компилятор Inno
 ```xml
   <properties>
     <!--Прописать путь к ISCC.exe-->
-    <inno.exe.path>D:\Inno Setup 5\ISCC.exe</inno.exe.path>
+    <inno.exe.path>*\ISCC.exe</inno.exe.path>
   </properties>
 ```
 затем указываем путь к проекту на вашем компьютере
@@ -37,6 +37,6 @@ cначала указываем путь к ISCC.exe (компилятор Inno
 #define ResourceDir "C:\Users\***\IdeaProjects\ff14-ru-translation-auto-updater"
 ```
 и наконец запускаем сборку с включеным профилем
-```
+```console
 mvn clean install -P compile-installer
 ```
