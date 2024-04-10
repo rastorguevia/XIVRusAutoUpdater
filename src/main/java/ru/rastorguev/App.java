@@ -14,7 +14,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.apache.commons.io.FileUtils.delete;
@@ -34,14 +36,14 @@ public class App {
         try {
             final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
             var versionTagGithub = getVersionFrom(jsonLatestGithubRelease.getString(GITHUB_TAG));
-            log.debug("Последняя версия с Github: {}", versionTagGithub);
+            log.info("Последняя версия с Github: {}", versionTagGithub);
 
             final var programDir = new File(System.getProperty(PROGRAM_DIR));
             final var translationFolder = getTranslationFolder(programDir);
 
             final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
             final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
-            log.debug("Локальная версия: {}", localVersion);
+            log.info("Локальная версия: {}", localVersion);
 
             log.info("Проверка тегов версий: {} ms", getTimeConsumption(timer));
             timer = System.nanoTime();
@@ -68,14 +70,35 @@ public class App {
 
             } else log.info("Нет новых обновлений");
 
+            deleteOldLogs(programDir);
+
         } catch (Exception e) {
             log.error("main", e);
             SystemNotificationUtil.notificationError();
         } finally {
             log.info("Завершение работы: {} ms", getTimeConsumption(startTimer));
-            // ждем возможного нажатия на уведомление для перехода на сайт при обновлении, либо для отткрытия лога при ошибке
+            // ждем возможного нажатия на уведомление для перехода на сайт при обновлении, либо для открытия лога при ошибке
             Thread.sleep(10000);
             System.exit(0);
+        }
+
+    }
+
+    private static void deleteOldLogs(File programDir) {
+        var logDir = new File(programDir + LOG_PATH);
+
+        if (logDir.exists()) {
+            var logListFiles = logDir.listFiles();
+
+            if (logListFiles != null && logListFiles.length > 5) {
+                log.info("Удаление старых логов");
+
+                Stream.of(Objects.requireNonNull(logDir.listFiles()))
+                        .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                        .skip(5)
+                        .forEach(File::delete);
+            }
+
         }
 
     }

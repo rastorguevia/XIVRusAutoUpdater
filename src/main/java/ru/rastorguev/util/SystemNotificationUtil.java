@@ -59,7 +59,7 @@ public class SystemNotificationUtil {
     }
 
     public static void notificationError() {
-        notificationError("Что-то пошло не так, нажмите на уведомление для открытия лога и получения полной информации");
+        notificationError("Нажмите, чтобы узнать подробности");
     }
 
     public static void notificationError(String message) {
