@@ -181,7 +181,7 @@ public class App {
                 .forEach(log::info);
 
         log.info("Подробнее о проекте перевода: " + XIV_RUS_SITE);
-        log.info("Об изменениях на Github странице проекта перевода: https://github.com/xivrus/xiv_ru_weblate/releases");
+        log.info("Об изменениях на Github странице перевода: https://github.com/xivrus/xiv_ru_weblate/releases");
         log.info("_________________________________ \n");
     }
 
