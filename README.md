@@ -1,4 +1,5 @@
 # XIVRusTranslationAutoUpdater
+[![Java CI with Maven](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/actions/workflows/maven.yml/badge.svg)](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/actions/workflows/maven.yml)
 
 ## Использование
 
@@ -10,7 +11,7 @@
 * ***Автозапуск.*** При установке будет создан ярлык в ``C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup``
 * ***Обновление перевода.*** Больше не нужно следить за фиксами при обновлении игры, или делать что то руками.
 * ***Логирование действий приложения.*** Для отладки и нахождения проблем.
-* ***Уведомление пользователя об обновлении.*** Об обновлениях и ошибках будут приходить уведомления Windows в трей системы.
+* ***Уведомления.*** Об обновлениях и ошибках будут приходить уведомления Windows в трей системы.
 На данные уведомления добавлены ивенты, так что при уведомлении об обновлении будет возможность перейти на сайт команды перевода,
 а при ошибке - открыть .log файл для получения детальной информации и создания [Issues](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/issues) 
 на странице данного проекта. Перед созданием баг репорта ознакомьтесь с [правилами](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/blob/master/CONTRIBUTING.md)

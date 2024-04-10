@@ -75,6 +75,7 @@ public class App {
         } catch (Exception e) {
             log.error("main", e);
             SystemNotificationUtil.notificationError();
+
         } finally {
             log.info("Завершение работы: {} ms", getTimeConsumption(startTimer));
             // ждем возможного нажатия на уведомление для перехода на сайт при обновлении, либо для открытия лога при ошибке
