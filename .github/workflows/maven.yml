@@ -27,5 +27,7 @@ jobs:
         java-version: '22'
         distribution: 'temurin'
         cache: maven
+        node-version: 20.x
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
