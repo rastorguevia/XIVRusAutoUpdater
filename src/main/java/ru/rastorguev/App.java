@@ -74,7 +74,7 @@ public class App {
         } finally {
             log.info("Завершение работы: {} ms", getTimeConsumption(startTimer));
             // ждем возможного нажатия на уведомление для перехода на сайт при обновлении, либо для отткрытия лога при ошибке
-            Thread.sleep(15000);
+            Thread.sleep(10000);
             System.exit(0);
         }
 
