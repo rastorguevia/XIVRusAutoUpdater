@@ -3,6 +3,7 @@ package ru.rastorguev;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.json.JSONObject;
+import ru.rastorguev.util.SystemNotificationUtil;
 
 import java.io.*;
 import java.net.URI;
@@ -13,33 +14,36 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.apache.commons.io.FileUtils.delete;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
-import static ru.rastorguev.util.PatternUtil.getVersionFrom;
 import static ru.rastorguev.dto.constant.Constants.*;
+import static ru.rastorguev.util.PatternUtil.getVersionFrom;
 
 
 @Slf4j
 public class App {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         long timer = System.nanoTime();
         long startTimer = System.nanoTime();
+
         try {
             final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
             var versionTagGithub = getVersionFrom(jsonLatestGithubRelease.getString(GITHUB_TAG));
-            log.debug("Последняя версия с Github: {}", versionTagGithub);
+            log.info("Последняя версия с Github: {}", versionTagGithub);
 
             final var programDir = new File(System.getProperty(PROGRAM_DIR));
             final var translationFolder = getTranslationFolder(programDir);
 
             final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
             final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
-            log.debug("Локальная версия: {}", localVersion);
+            log.info("Локальная версия: {}", localVersion);
 
             log.info("Проверка тегов версий: {} ms", getTimeConsumption(timer));
             timer = System.nanoTime();
@@ -62,13 +66,39 @@ public class App {
                 log.info("Новая версия перевода: {}", versionTagGithub);
 
                 logWhatIsNew(jsonLatestGithubRelease);
+                SystemNotificationUtil.notificationUpdate("Обновление " + localVersion + " ⮞ " + versionTagGithub);
 
             } else log.info("Нет новых обновлений");
 
+            deleteOldLogs(programDir);
+
         } catch (Exception e) {
             log.error("main", e);
+            SystemNotificationUtil.notificationError();
         } finally {
             log.info("Завершение работы: {} ms", getTimeConsumption(startTimer));
+            // ждем возможного нажатия на уведомление для перехода на сайт при обновлении, либо для открытия лога при ошибке
+            Thread.sleep(10000);
+            System.exit(0);
+        }
+
+    }
+
+    private static void deleteOldLogs(File programDir) {
+        var logDir = new File(programDir + LOG_PATH);
+
+        if (logDir.exists()) {
+            var logListFiles = logDir.listFiles();
+
+            if (logListFiles != null && logListFiles.length > 5) {
+                log.info("Удаление старых логов");
+
+                Stream.of(Objects.requireNonNull(logDir.listFiles()))
+                        .sorted(Comparator.comparingLong(File::lastModified).reversed())
+                        .skip(5)
+                        .forEach(File::delete);
+            }
+
         }
 
     }
@@ -80,12 +110,14 @@ public class App {
     private static void renameAndDeleteOldTranslation(File translationFolder) {
         long timer = System.nanoTime();
         var oldTranslationFolder = new File(translationFolder.getParent() + "/" + XIV_RU_FOLDER_NAME + "_old");
-        translationFolder.renameTo(oldTranslationFolder);
+
+        if (!translationFolder.renameTo(oldTranslationFolder)) return;
 
         try {
             deleteDirectory(oldTranslationFolder);
         } catch (IOException e) {
-            log.error("Предыдущая версия перевода НЕ удалена");
+            log.error(FOLDER_NOT_DELETED);
+            SystemNotificationUtil.notificationError(FOLDER_NOT_DELETED);
             return;
         }
         log.info("Предыдущая версия перевода удалена: {} ms", getTimeConsumption(timer));
@@ -148,8 +180,9 @@ public class App {
                 .filter(str -> str.startsWith("*"))
                 .forEach(log::info);
 
-        log.info("Подробнее о проекте перевода: https://xivrus.ru/");
-        log.info("Об изменениях на Github странице проекта перевода: https://github.com/xivrus/xiv_ru_weblate/releases \n");
+        log.info("Подробнее о проекте перевода: " + XIV_RUS_SITE);
+        log.info("Об изменениях на Github странице перевода: https://github.com/xivrus/xiv_ru_weblate/releases");
+        log.info("_________________________________ \n");
     }
 
 }
