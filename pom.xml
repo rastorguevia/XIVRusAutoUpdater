@@ -109,13 +109,14 @@
     <finalName>${project.artifactId}</finalName>
 
     <plugins>
-      <!-- Копируем JDK в target -->
+      <!-- Копируем JDK и bat в target -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.6</version>
         <executions>
+
           <execution>
-            <id>copy-resources</id>
+            <id>copy-jdk</id>
             <phase>package</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -129,6 +130,45 @@
               </resources>
             </configuration>
           </execution>
+
+          <execution>
+            <id>copy-bat</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/win32</outputDirectory>
+              <resources>
+                <resource>
+                <directory>${project.basedir}\installer\</directory>
+                <includes>
+                  <include>associatepmp.bat</include>
+                </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-file-type-favicon</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/win32</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}\installer\</directory>
+                  <includes>
+                    <include>file_type_favicon.ico</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
         </executions>
       </plugin>
 
@@ -136,6 +176,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <id>copy-lib</id>
             <phase>package</phase>
             <goals>
               <goal>copy-dependencies</goal>

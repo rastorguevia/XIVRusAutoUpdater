@@ -26,14 +26,14 @@
 mvn clean install
 ```
 #### Если хотим собрать с установщиком, 
-cначала указываем путь к ISCC.exe (компилятор Inno Setup)
+cначала указываем [путь к ISCC.exe](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/blob/master/pom.xml) (компилятор Inno Setup)
 ```xml
   <properties>
     <!--Прописать путь к ISCC.exe-->
     <inno.exe.path>*\ISCC.exe</inno.exe.path>
   </properties>
 ```
-затем указываем путь к проекту на вашем компьютере
+затем указываем [путь к проекту](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/blob/master/installer/TranslationUpdaterInstaller.iss) на вашем компьютере
 ```iss
 #define ResourceDir "C:\Users\***\IdeaProjects\ff14-ru-translation-auto-updater"
 ```

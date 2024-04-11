@@ -33,42 +33,29 @@ public class App {
         long timer = System.nanoTime();
         long startTimer = System.nanoTime();
 
+
+
+        log.info("args length: {}", args.length);
+
+        if (args.length != 0) {
+            for (String arg : args) {
+                log.info("arg: {}", arg);
+            }
+        }
+
+
+
+
+
+
+
+
+
         try {
-            final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
-            var versionTagGithub = getVersionFrom(jsonLatestGithubRelease.getString(GITHUB_TAG));
-            log.info("Последняя версия с Github: {}", versionTagGithub);
-
             final var programDir = new File(System.getProperty(PROGRAM_DIR));
-            final var translationFolder = getTranslationFolder(programDir);
 
-            final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
-            final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
-            log.info("Локальная версия: {}", localVersion);
-
-            log.info("Проверка тегов версий: {} ms", getTimeConsumption(timer));
-            timer = System.nanoTime();
-
-            if (!localVersion.equals(versionTagGithub)) {
-                final var releaseZipFile = new File(programDir + RELEASE_ZIP);
-
-                runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
-
-                downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
-                log.info("Архив новой версии перевода сохранен: {} ms", getTimeConsumption(timer));
-                timer = System.nanoTime();
-
-                unzip(releaseZipFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME);
-                log.info("Новая версия перевода разархивирована в папку с модами: {} ms", getTimeConsumption(timer));
-                timer = System.nanoTime();
-
-                delete(releaseZipFile);
-                log.info("Архив перевода удален: {} ms", getTimeConsumption(timer));
-                log.info("Новая версия перевода: {}", versionTagGithub);
-
-                logWhatIsNew(jsonLatestGithubRelease);
-                SystemNotificationUtil.notificationUpdate("Обновление " + localVersion + " ⮞ " + versionTagGithub);
-
-            } else log.info("Нет новых обновлений");
+            if (args.length == 0) updateTranslationFromRemote(programDir, timer);
+            else updateTranslationFromFile(args[0], programDir, timer);
 
             deleteOldLogs(programDir);
 
@@ -83,6 +70,66 @@ public class App {
             System.exit(0);
         }
 
+    }
+
+    private static void updateTranslationFromFile(String arg, File programDir, long timer) throws IOException {
+        log.info("Запущено обновление из локального файла");
+
+        final var translationFolder = getTranslationFolder(programDir);
+        final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
+        final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
+        log.info("Локальная версия: {}", localVersion);
+
+        final var openedFile = new File(arg);
+        if (!openedFile.exists()) {
+            log.error("Файл не найден");
+            return;
+        }
+
+        //todo дописать открытие файлов
+        // 1) переносить файл в папку внутри папки апдейтера ,меняя имя на дату и время открытия + версия перевода
+        // 2) дальше поменять формат на zip? а может и не надо, удалить текущий перевод, разархивировать новый
+        // 3) записать в лог и вывести уведомление о прошлой -> текущей версии и отом что файл перевода перемещен и создать экшен для перехода в папку
+        // 4) так же настроить удаление файлов перевода после 10ка (сделать этот параметр настраивым)
+
+    }
+
+    private static void updateTranslationFromRemote(File programDir, long timer) throws Exception {
+        log.info("Запущена проверка наличия обновлений");
+
+        final var translationFolder = getTranslationFolder(programDir);
+        final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
+        final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
+        log.info("Локальная версия: {}", localVersion);
+
+        final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
+        var versionTagGithub = getVersionFrom(jsonLatestGithubRelease.getString(GITHUB_TAG));
+        log.info("Последняя версия с Github: {}", versionTagGithub);
+
+        log.info("Проверка тегов версий: {} ms", getTimeConsumption(timer));
+        timer = System.nanoTime();
+
+        if (!localVersion.equals(versionTagGithub)) {
+            final var releaseZipFile = new File(programDir + RELEASE_ZIP);
+
+            runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
+
+            downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
+            log.info("Архив новой версии перевода сохранен: {} ms", getTimeConsumption(timer));
+            timer = System.nanoTime();
+
+            unzip(releaseZipFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME);
+            log.info("Новая версия перевода разархивирована в папку с модами: {} ms", getTimeConsumption(timer));
+            timer = System.nanoTime();
+
+            delete(releaseZipFile);
+            log.info("Архив перевода удален: {} ms", getTimeConsumption(timer));
+            log.info("Новая версия перевода: {}", versionTagGithub);
+
+            logWhatIsNew(jsonLatestGithubRelease);
+            SystemNotificationUtil.notificationUpdate("Обновление " + localVersion + " ⮞ " + versionTagGithub);
+
+        } else log.info("Нет новых обновлений");
     }
 
     private static void deleteOldLogs(File programDir) {

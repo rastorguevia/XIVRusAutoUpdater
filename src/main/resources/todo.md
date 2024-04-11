@@ -14,13 +14,3 @@
 * Inno Setup Github Action https://github.com/Minionguyjpro/Inno-Setup-Action
 * Java with Maven By GitHub Actions
 * Publish Java Package with Maven
-
-
-
-
-
-
-
-
-
-* C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup (проверить ярлык в стартапе)
