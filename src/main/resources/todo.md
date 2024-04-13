@@ -24,3 +24,6 @@
 
 
 *jlink для уменьшения размера https://youtu.be/x_6NMAirP-w?si=4oF_UIUKipIrnflR
+
+
+также копировать readme и лицензию в установщик 
