@@ -5,6 +5,12 @@ import net.lingala.zip4j.ZipFile;
 import org.json.JSONObject;
 import ru.rastorguev.util.SystemNotificationUtil;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,12 +32,78 @@ import static ru.rastorguev.util.PatternUtil.getVersionFrom;
 
 
 @Slf4j
-public class App {
+public class App
+        //extends JPanel implements ActionListener
+{
+
+
+
+
+
+
+//    JButton go;
+//
+//    JFileChooser chooser;
+//    String choosertitle;
+//
+//    public App() {
+//        go = new JButton("Do it");
+//        go.addActionListener(this);
+//        add(go);
+//    }
+//
+//    public void actionPerformed(ActionEvent e) {
+//        chooser = new JFileChooser();
+//        chooser.setCurrentDirectory(new java.io.File("."));
+//        chooser.setDialogTitle(choosertitle);
+//        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//        //
+//        // disable the "All files" option.
+//        //
+//        chooser.setAcceptAllFileFilterUsed(false);
+//        //
+//        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+//            System.out.println("getCurrentDirectory(): "
+//                    +  chooser.getCurrentDirectory());
+//            System.out.println("getSelectedFile() : "
+//                    +  chooser.getSelectedFile());
+//        }
+//        else {
+//            System.out.println("No Selection ");
+//        }
+//    }
+//
+//    public Dimension getPreferredSize(){
+//        return new Dimension(200, 200);
+//    }
+
+
+
+
+
+
+
 
     public static void main(String[] args) throws InterruptedException {
 
         long timer = System.nanoTime();
         long startTimer = System.nanoTime();
+
+
+
+
+//        JFrame frame = new JFrame("");
+//        App panel = new App();
+//        frame.addWindowListener(
+//                new WindowAdapter() {
+//                    public void windowClosing(WindowEvent e) {
+//                        System.exit(0);
+//                    }
+//                }
+//        );
+//        frame.getContentPane().add(panel,"Center");
+//        frame.setSize(panel.getPreferredSize());
+//        frame.setVisible(true);
 
 
 
@@ -43,6 +115,14 @@ public class App {
             }
         }
 
+
+
+        FileDialog dialog = new FileDialog(new Frame(), "Выбери файл перевода", FileDialog.LOAD);
+        //dialog.setFilenameFilter((dir, name) -> name.endsWith(".pmp"));
+        //dialog.setMultipleMode(false);
+        dialog.setDirectory("D:\\FFXIVMods\\TranslationUpdater");
+        dialog.setVisible(true);
+        System.out.println(Arrays.stream(dialog.getFiles()).map(File::getAbsolutePath).toList());
 
 
 
@@ -78,13 +158,20 @@ public class App {
         final var translationFolder = getTranslationFolder(programDir);
         final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
         final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
-        log.info("Локальная версия: {}", localVersion);
+        log.info("Текущая версия: {}", localVersion);
 
         final var openedFile = new File(arg);
         if (!openedFile.exists()) {
             log.error("Файл не найден");
             return;
         }
+
+        //runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
+
+        //unzip(openedFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME + "_privet"); //todo
+
+
+
 
         //todo дописать открытие файлов
         // 1) переносить файл в папку внутри папки апдейтера ,меняя имя на дату и время открытия + версия перевода
@@ -100,7 +187,7 @@ public class App {
         final var translationFolder = getTranslationFolder(programDir);
         final var jsonTranslationMeta = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
         final var localVersion = getVersionFrom(jsonTranslationMeta.getString(META_JSON_VERSION));
-        log.info("Локальная версия: {}", localVersion);
+        log.info("Текущая версия: {}", localVersion);
 
         final var jsonLatestGithubRelease = getJsonLatestGithubRelease(XIV_RU_RELEASE_LATEST);
         var versionTagGithub = getVersionFrom(jsonLatestGithubRelease.getString(GITHUB_TAG));

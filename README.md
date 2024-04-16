@@ -8,13 +8,13 @@
 * ГОТОВО!
 
 ## Что может приложение
-* ***Автозапуск.*** При установке будет создан ярлык в ``C:\Users\%USERNAME%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup``
+* ***Автозапуск.*** При установке будет создан ярлык в ``%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup``
 * ***Обновление перевода.*** Больше не нужно следить за фиксами при обновлении игры, или делать что то руками.
 * ***Логирование действий приложения.*** Для отладки и нахождения проблем.
 * ***Уведомления.*** Об обновлениях и ошибках будут приходить уведомления Windows в трей системы.
 На данные уведомления добавлены ивенты, так что при уведомлении об обновлении будет возможность перейти на сайт команды перевода,
 а при ошибке - открыть .log файл для получения детальной информации и создания [Issues](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/issues) 
-на странице данного проекта. Перед созданием баг репорта ознакомьтесь с [правилами](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/blob/master/CONTRIBUTING.md)
+на странице данного проекта. Перед созданием баг репорта ознакомьтесь с [правилами](https://github.com/rastorguevia/XIVRusTranslationAutoUpdater/blob/master/CONTRIBUTING.md).
 
 ## Если собираем сами
 * Java 22 

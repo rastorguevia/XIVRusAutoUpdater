@@ -34,3 +34,5 @@ Name: "{userstartup}\{#AppName}"; Filename: "{app}\{#AppName}.exe"; WorkingDir: 
 [Run]
 Filename: "{app}\win32\associatepmp.bat"; Parameters: "install"; Flags: runhidden
 Filename: "{app}\{#AppName}.exe"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
+
+;[UninstallRun] bat file to delete from registry and ftype and assoc
