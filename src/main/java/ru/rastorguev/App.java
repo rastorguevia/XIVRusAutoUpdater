@@ -117,12 +117,12 @@ public class App
 
 
 
-        FileDialog dialog = new FileDialog(new Frame(), "Выбери файл перевода", FileDialog.LOAD);
-        //dialog.setFilenameFilter((dir, name) -> name.endsWith(".pmp"));
-        //dialog.setMultipleMode(false);
-        dialog.setDirectory("D:\\FFXIVMods\\TranslationUpdater");
-        dialog.setVisible(true);
-        System.out.println(Arrays.stream(dialog.getFiles()).map(File::getAbsolutePath).toList());
+//        FileDialog dialog = new FileDialog(new Frame(), "Выбери файл перевода", FileDialog.LOAD);
+//        //dialog.setFilenameFilter((dir, name) -> name.endsWith(".pmp"));
+//        //dialog.setMultipleMode(false);
+//        dialog.setDirectory("D:\\FFXIVMods\\TranslationUpdater");
+//        dialog.setVisible(true);
+//        System.out.println(Arrays.stream(dialog.getFiles()).map(File::getAbsolutePath).toList());
 
 
 
@@ -164,7 +164,7 @@ public class App
         if (!openedFile.exists()) {
             log.error("Файл не найден");
             return;
-        }
+        } log.info("Файл найден {}", openedFile.getAbsoluteFile());
 
         //runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
 
