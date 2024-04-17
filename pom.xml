@@ -132,7 +132,7 @@
           </execution>
 
           <execution>
-            <id>copy-bat</id>
+            <id>copy-resources-for-installer</id>
             <phase>package</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -144,26 +144,9 @@
                 <directory>${project.basedir}\installer\</directory>
                 <includes>
                   <include>associatepmp.bat</include>
+                  <include>deletereg.bat</include>
+                  <include>file_type_favicon.ico</include>
                 </includes>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-
-          <execution>
-            <id>copy-file-type-favicon</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/win32</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${project.basedir}\installer\</directory>
-                  <includes>
-                    <include>file_type_favicon.ico</include>
-                  </includes>
                 </resource>
               </resources>
             </configuration>

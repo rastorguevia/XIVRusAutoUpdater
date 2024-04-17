@@ -20,6 +20,7 @@ SetupIconFile={#ResourceDir}\target\classes\favicon.ico
 Compression=lzma
 SolidCompression=yes
 DisableProgramGroupPage=true
+AlwaysRestart=yes
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
@@ -35,4 +36,5 @@ Name: "{userstartup}\{#AppName}"; Filename: "{app}\{#AppName}.exe"; WorkingDir: 
 Filename: "{app}\win32\associatepmp.bat"; Parameters: "install"; Flags: runhidden
 Filename: "{app}\{#AppName}.exe"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
 
-;[UninstallRun] bat file to delete from registry and ftype and assoc
+[UninstallRun]
+Filename: "{app}\win32\deletereg.bat"; Flags: runhidden

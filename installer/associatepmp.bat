@@ -1,6 +1,6 @@
 for %%A in ("%~dp0.") do set "folder=%%~dpA"
 
-set "ftypename=release"
+set "ftypename=translationpmp"
 set "extension=.pmp"
 set "pathtoexe=%folder%TranslationUpdater.exe"
 set "pathtoicon=%~dp0file_type_favicon.ico"
