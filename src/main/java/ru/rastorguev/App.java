@@ -3,14 +3,9 @@ package ru.rastorguev;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import org.json.JSONObject;
+import ru.rastorguev.dto.constant.HistoricTranslationFile;
 import ru.rastorguev.util.SystemNotificationUtil;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,117 +14,27 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
-import static org.apache.commons.io.FileUtils.delete;
-import static org.apache.commons.io.FileUtils.deleteDirectory;
+import static org.apache.commons.io.FileUtils.*;
 import static ru.rastorguev.dto.constant.Constants.*;
+import static ru.rastorguev.util.PatternUtil.getFileNameWithoutExtension;
 import static ru.rastorguev.util.PatternUtil.getVersionFrom;
 
 
 @Slf4j
-public class App
-        //extends JPanel implements ActionListener
-{
-
-
-
-
-
-
-//    JButton go;
-//
-//    JFileChooser chooser;
-//    String choosertitle;
-//
-//    public App() {
-//        go = new JButton("Do it");
-//        go.addActionListener(this);
-//        add(go);
-//    }
-//
-//    public void actionPerformed(ActionEvent e) {
-//        chooser = new JFileChooser();
-//        chooser.setCurrentDirectory(new java.io.File("."));
-//        chooser.setDialogTitle(choosertitle);
-//        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//        //
-//        // disable the "All files" option.
-//        //
-//        chooser.setAcceptAllFileFilterUsed(false);
-//        //
-//        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-//            System.out.println("getCurrentDirectory(): "
-//                    +  chooser.getCurrentDirectory());
-//            System.out.println("getSelectedFile() : "
-//                    +  chooser.getSelectedFile());
-//        }
-//        else {
-//            System.out.println("No Selection ");
-//        }
-//    }
-//
-//    public Dimension getPreferredSize(){
-//        return new Dimension(200, 200);
-//    }
-
-
-
-
-
-
-
+public class App {
 
     public static void main(String[] args) throws InterruptedException {
 
-        long timer = System.nanoTime();
-        long startTimer = System.nanoTime();
-
-
-
-
-//        JFrame frame = new JFrame("");
-//        App panel = new App();
-//        frame.addWindowListener(
-//                new WindowAdapter() {
-//                    public void windowClosing(WindowEvent e) {
-//                        System.exit(0);
-//                    }
-//                }
-//        );
-//        frame.getContentPane().add(panel,"Center");
-//        frame.setSize(panel.getPreferredSize());
-//        frame.setVisible(true);
-
-
-
-        log.info("args length: {}", args.length);
-
-        if (args.length != 0) {
-            for (String arg : args) {
-                log.info("arg: {}", arg);
-            }
-        }
-
-
-
-//        FileDialog dialog = new FileDialog(new Frame(), "Выбери файл перевода", FileDialog.LOAD);
-//        //dialog.setFilenameFilter((dir, name) -> name.endsWith(".pmp"));
-//        //dialog.setMultipleMode(false);
-//        dialog.setDirectory("D:\\FFXIVMods\\TranslationUpdater");
-//        dialog.setVisible(true);
-//        System.out.println(Arrays.stream(dialog.getFiles()).map(File::getAbsolutePath).toList());
-
-
-
-
-
-
-
+        long timer = System.currentTimeMillis();
+        long startTimer = System.currentTimeMillis();
 
         try {
             final var programDir = new File(System.getProperty(PROGRAM_DIR));
@@ -166,19 +71,22 @@ public class App
             return;
         } log.info("Файл найден {}", openedFile.getAbsoluteFile());
 
-        //runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
+        deleteDirectory(translationFolder);
 
-        //unzip(openedFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME + "_privet"); //todo
+        unzip(openedFile.getAbsolutePath(), translationFolder.getAbsolutePath());
 
+        final var jsonTranslationMetaNew = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
+        final var localVersionNew = getVersionFrom(jsonTranslationMetaNew.getString(META_JSON_VERSION));
+        log.info("Новая версия из {}: {}", openedFile.getName(), localVersionNew);
 
+        var historicFolderStr = programDir + TRANSLATION_HISTORY_PATH;
+        var newFileName = getFileNameWithoutExtension(openedFile.getName()) + "_" + localVersionNew + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm-ss")) + ".pmp";
+        copyFile(openedFile, new File(historicFolderStr + "/" + newFileName));
+        log.info("Файл перевода скопирован в папку {} c новым названием {}", historicFolderStr, newFileName);
 
+        SystemNotificationUtil.notificationUpdateFromFile("Обновление " + localVersion + " ⮞ " + localVersionNew);
 
-        //todo дописать открытие файлов
-        // 1) переносить файл в папку внутри папки апдейтера ,меняя имя на дату и время открытия + версия перевода
-        // 2) дальше поменять формат на zip? а может и не надо, удалить текущий перевод, разархивировать новый
-        // 3) записать в лог и вывести уведомление о прошлой -> текущей версии и отом что файл перевода перемещен и создать экшен для перехода в папку
-        // 4) так же настроить удаление файлов перевода после 10ка (сделать этот параметр настраивым)
-
+        deleteOldTraslationFiles(historicFolderStr);
     }
 
     private static void updateTranslationFromRemote(File programDir, long timer) throws Exception {
@@ -223,9 +131,9 @@ public class App
         var logDir = new File(programDir + LOG_PATH);
 
         if (logDir.exists()) {
-            var logListFiles = logDir.listFiles();
+            var logFilesArray = logDir.listFiles();
 
-            if (logListFiles != null && logListFiles.length > 5) {
+            if (logFilesArray != null && logFilesArray.length > 5) {
                 log.info("Удаление старых логов");
 
                 Stream.of(Objects.requireNonNull(logDir.listFiles()))
@@ -233,13 +141,35 @@ public class App
                         .skip(5)
                         .forEach(File::delete);
             }
-
         }
+    }
 
+    private static void deleteOldTraslationFiles(String pathToTranslationFolder) {
+        var translationDir = new File(pathToTranslationFolder);
+
+        if (translationDir.exists()) {
+            var translationFilesArray = translationDir.listFiles();
+
+            if (translationFilesArray != null && translationFilesArray.length > 5) {
+                log.info("Удаление старых логов");
+
+                Stream.of(Objects.requireNonNull(translationDir.listFiles()))
+                        .map(file -> new HistoricTranslationFile(file, getTranslationFileExecuteDateTime(
+                                            getFileNameWithoutExtension(file.getName())))
+                        )
+                        .sorted(Comparator.comparing(HistoricTranslationFile::getLocalDateTime).reversed())
+                        .skip(5)
+                        .forEach(hFile -> hFile.getFile().delete());
+            }
+        }
+    }
+
+    private static LocalDateTime getTranslationFileExecuteDateTime(String filename) {
+        return LocalDateTime.parse(filename.substring(filename.length() - 19), DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm-ss"));
     }
 
     private static Long getTimeConsumption(long timer) {
-        return (System.nanoTime() - timer)/1000000;
+        return (System.currentTimeMillis() - timer);
     }
 
     private static void renameAndDeleteOldTranslation(File translationFolder) {

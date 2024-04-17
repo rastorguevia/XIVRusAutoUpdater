@@ -58,6 +58,17 @@ public class SystemNotificationUtil {
         trayIcon.displayMessage(title, "\n* Перевод был обновлен \n* Для получения подробной информации нажмите на данное уведомление", TrayIcon.MessageType.NONE);
     }
 
+    public static void notificationUpdateFromFile(String title) {
+        trayIcon.addActionListener(_ -> {
+            try {
+                Desktop.getDesktop().open(new File(System.getProperty(PROGRAM_DIR) + TRANSLATION_HISTORY_PATH));
+            } catch (IOException e) {
+                log.error("SystemNotificationUtil.error", e);
+            }
+        });
+        trayIcon.displayMessage(title, "\n* Перевод был обновлен. \n* Файл был скопирован в архивную папку. Для открытия - нажмите на уведомление", TrayIcon.MessageType.NONE);
+    }
+
     public static void notificationError() {
         notificationError("Нажмите, чтобы узнать подробности");
     }
