@@ -5,7 +5,7 @@
   <groupId>ru.rastorguev</groupId>
   <artifactId>ff14-ru-translation-auto-updater</artifactId>
   <name>TranslationUpdater</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <packaging>jar</packaging>
 
   <description>Automatic update tool for unofficial Russian localization FINAL FANTASY XIV (XIV Rus)</description>
@@ -25,8 +25,17 @@
     <maven.compiler.target>22</maven.compiler.target>
 
     <!--Прописать путь к ISCC.exe-->
-    <inno.exe.path>D:\Inno Setup 5\ISCC.exe</inno.exe.path>
+    <inno.exe.path>*\ISCC.exe</inno.exe.path>
   </properties>
+
+  <scm>
+    <connection>scm:git:http://127.0.0.1/dummy</connection>
+    <developerConnection>
+      scm:git:https://127.0.0.1/dummy
+    </developerConnection>
+    <tag>HEAD</tag>
+    <url>http://127.0.0.1/dummy</url>
+  </scm>
 
   <dependencies>
 
@@ -34,6 +43,12 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20240303</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>2.2</version>
     </dependency>
 
     <dependency>
@@ -94,6 +109,7 @@
                   <workingDirectory>${project.basedir}</workingDirectory>
                   <arguments>
                     <argument>${project.basedir}\installer\TranslationUpdaterInstaller.iss</argument>
+                    <argument>"/DVersion=${project.version}.${buildNumber}"</argument>
                   </arguments>
                 </configuration>
               </execution>
@@ -109,26 +125,140 @@
     <finalName>${project.artifactId}</finalName>
 
     <plugins>
-      <!-- Копируем JDK в target -->
+
+      <plugin>
+        <groupId>com.igormaznitsa</groupId>
+        <artifactId>mvn-jlink-wrapper</artifactId>
+        <version>1.2.1</version>
+        <executions>
+
+          <execution>
+            <id>call-jdeps</id>
+            <goals>
+              <goal>jdeps</goal>
+            </goals>
+            <configuration>
+              <output>${project.build.directory}${file.separator}jdeps.out</output>
+              <options>
+                <option>${project.build.directory}${file.separator}${project.build.finalName}.jar</option>
+              </options>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>call-jlink</id>
+            <goals>
+              <goal>jlink</goal>
+            </goals>
+            <configuration>
+              <jdepsReportPath>${project.build.directory}${file.separator}jdeps.out</jdepsReportPath>
+              <output>${project.build.directory}/win32/java</output>
+              <modulePaths>
+                <path>${java.home}${file.separator}jmods</path>
+              </modulePaths>
+              <addModules>
+                <module>java.compiler</module>
+              </addModules>
+              <options>
+                <option>--compress=2</option>
+                <option>--no-header-files</option>
+                <option>--no-man-pages</option>
+                <option>--strip-debug</option>
+              </options>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>buildNumber</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <format>{0,number}</format>
+          <items>
+            <item>buildNumber</item>
+          </items>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+          <revisionOnScmFailure>true</revisionOnScmFailure>
+        </configuration>
+      </plugin>
+
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.6</version>
         <executions>
+
           <execution>
-            <id>copy-resources</id>
+            <id>copy-resources-for-installer</id>
             <phase>package</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/win32/java</outputDirectory>
+              <outputDirectory>${project.build.directory}/win32</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${java.home}</directory>
+                <directory>${project.basedir}\installer\</directory>
+                <includes>
+                  <include>associatepmp.bat</include>
+                  <include>deletereg.bat</include>
+                  <include>file_type_favicon.ico</include>
+                </includes>
                 </resource>
               </resources>
             </configuration>
           </execution>
+
+          <execution>
+            <id>copy-readme</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}</directory>
+                  <includes>
+                    <include>README.md</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-config</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/main/resources</directory>
+                  <includes>
+                    <include>config.yaml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
         </executions>
       </plugin>
 
@@ -136,6 +266,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <id>copy-lib</id>
             <phase>package</phase>
             <goals>
               <goal>copy-dependencies</goal>
@@ -172,18 +303,15 @@
                 <jarLocation>./win32/lib</jarLocation>
               </classPath>
               <jre>
-                <minVersion>${maven.compiler.target}</minVersion>
                 <path>./win32/java</path>
-                <requiresJdk>true</requiresJdk>
-                <requires64Bit>true</requires64Bit>
               </jre>
               <versionInfo>
-                <fileVersion>1.0.0.0</fileVersion>
-                <txtFileVersion>1.0.0</txtFileVersion>
+                <fileVersion>${project.version}.${buildNumber}</fileVersion>
+                <txtFileVersion>${project.version}</txtFileVersion>
                 <fileDescription>${project.description}</fileDescription>
                 <copyright>The developer is not connected in any way with the XIV Rus and SQUARE ENIX team. All rights belong to their owners.</copyright>
-                <productVersion>1.0.0.0</productVersion>
-                <txtProductVersion>1.0.0</txtProductVersion>
+                <productVersion>${project.version}.${buildNumber}</productVersion>
+                <txtProductVersion>${project.version}</txtProductVersion>
                 <productName>${project.name}</productName>
                 <companyName>${project.organization.name}</companyName>
                 <internalName>${project.artifactId}</internalName>

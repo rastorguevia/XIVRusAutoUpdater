@@ -16,8 +16,9 @@ public class Constants {
     public static final String PROGRAM_DIR = "user.dir";
     public static final String GITHUB_TAG = "tag_name";
     public static final String META_JSON_VERSION = "Version";
-    public static final String RELEASE_ZIP = "/release.zip";
+    public static final String RELEASE_PMP = "/release.pmp";
     public static final String LOG_PATH = "/log";
+    public static final String TRANSLATION_HISTORY_PATH = "/translations";
 
     public static final String XIV_RU_FOLDER_NAME=  "XIV Rus";
     public static final String XIV_RUS_TRANSLATION_AUTO_UPDATER = "XIVRusTranslationAutoUpdater";

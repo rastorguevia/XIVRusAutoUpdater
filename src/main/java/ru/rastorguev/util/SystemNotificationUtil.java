@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static ru.rastorguev.dto.constant.Constants.*;
+import static ru.rastorguev.util.FileUtil.config;
 
 @Slf4j
 public class SystemNotificationUtil {
@@ -44,10 +45,14 @@ public class SystemNotificationUtil {
     }
 
     public static void notification(String title, String message, TrayIcon.MessageType messageType) {
+        if (config.isAllWinNotificationOff()) return;
+
         trayIcon.displayMessage(title, message, messageType);
     }
 
     public static void notificationUpdate(String title) {
+        if (config.isAllWinNotificationOff()) return;
+
         trayIcon.addActionListener(_ -> {
             try {
                 Desktop.getDesktop().browse(new URI(XIV_RUS_SITE));
@@ -58,11 +63,26 @@ public class SystemNotificationUtil {
         trayIcon.displayMessage(title, "\n* Перевод был обновлен \n* Для получения подробной информации нажмите на данное уведомление", TrayIcon.MessageType.NONE);
     }
 
+    public static void notificationUpdateFromFile(String title) {
+        if (config.isAllWinNotificationOff()) return;
+
+        trayIcon.addActionListener(_ -> {
+            try {
+                Desktop.getDesktop().open(new File(System.getProperty(PROGRAM_DIR) + TRANSLATION_HISTORY_PATH));
+            } catch (IOException e) {
+                log.error("SystemNotificationUtil.error", e);
+            }
+        });
+        trayIcon.displayMessage(title, "\n* Перевод был обновлен. \n* Файл был скопирован в архивную папку. Для открытия - нажмите на уведомление", TrayIcon.MessageType.NONE);
+    }
+
     public static void notificationError() {
         notificationError("Нажмите, чтобы узнать подробности");
     }
 
     public static void notificationError(String message) {
+        if (config.isAllWinNotificationOff() || config.isErrWinNotificationOff()) return;
+
         trayIcon.addActionListener(_ -> {
             try {
                 Desktop.getDesktop().open(new File(System.getProperty(PROGRAM_DIR) + "/log/app.log"));

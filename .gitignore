@@ -39,3 +39,5 @@ build/
 ### Other ###
 !/log/
 /.log/
+!/translations/
+!/buildNumber.properties
