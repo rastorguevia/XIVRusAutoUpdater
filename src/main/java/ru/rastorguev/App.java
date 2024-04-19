@@ -1,38 +1,32 @@
 package ru.rastorguev;
 
 import lombok.extern.slf4j.Slf4j;
-import net.lingala.zip4j.ZipFile;
 import org.json.JSONObject;
-import ru.rastorguev.dto.constant.HistoricTranslationFile;
-import ru.rastorguev.util.SystemNotificationUtil;
 
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.apache.commons.io.FileUtils.*;
 import static ru.rastorguev.dto.constant.Constants.*;
+import static ru.rastorguev.util.DownloadUtil.downloadTranslationRelease;
+import static ru.rastorguev.util.FileUtil.*;
+import static ru.rastorguev.util.JsonUtil.getJsonLatestGithubRelease;
+import static ru.rastorguev.util.JsonUtil.readAll;
+import static ru.rastorguev.util.LogUtil.logWhatIsNew;
 import static ru.rastorguev.util.PatternUtil.getFileNameWithoutExtension;
 import static ru.rastorguev.util.PatternUtil.getVersionFrom;
+import static ru.rastorguev.util.SystemNotificationUtil.*;
+import static ru.rastorguev.util.TimeUtil.getTimeConsumption;
 
 
 @Slf4j
 public class App {
 
     public static void main(String[] args) throws InterruptedException {
-
         long timer = System.currentTimeMillis();
         long startTimer = System.currentTimeMillis();
 
@@ -46,15 +40,14 @@ public class App {
 
         } catch (Exception e) {
             log.error("main", e);
-            SystemNotificationUtil.notificationError();
+            notificationError();
 
         } finally {
-            log.info("Завершение работы: {} ms", getTimeConsumption(startTimer));
+            log.info("Завершение работы: {} мс", getTimeConsumption(startTimer));
             // ждем возможного нажатия на уведомление для перехода на сайт при обновлении, либо для открытия лога при ошибке
             Thread.sleep(10000);
             System.exit(0);
         }
-
     }
 
     private static void updateTranslationFromFile(String arg, File programDir, long timer) throws IOException {
@@ -69,11 +62,18 @@ public class App {
         if (!openedFile.exists()) {
             log.error("Файл не найден");
             return;
-        } log.info("Файл найден {}", openedFile.getAbsoluteFile());
+        } log.info("Выбранный файл {}", openedFile.getAbsoluteFile());
+
+        log.debug("Проверка тега версии и выбранного файла: {} мс", getTimeConsumption(timer));
+        timer = System.currentTimeMillis();
 
         deleteDirectory(translationFolder);
+        log.debug("Удаление текущего перевода: {} мс", getTimeConsumption(timer));
+        timer = System.currentTimeMillis();
 
         unzip(openedFile.getAbsolutePath(), translationFolder.getAbsolutePath());
+        log.info("Новая версия перевода разархивирована в папку с модами: {} мс", getTimeConsumption(timer));
+        timer = System.currentTimeMillis();
 
         final var jsonTranslationMetaNew = new JSONObject(readAll(new FileReader(getTranslationMeta(translationFolder).getPath())));
         final var localVersionNew = getVersionFrom(jsonTranslationMetaNew.getString(META_JSON_VERSION));
@@ -82,9 +82,9 @@ public class App {
         var historicFolderStr = programDir + TRANSLATION_HISTORY_PATH;
         var newFileName = getFileNameWithoutExtension(openedFile.getName()) + "_" + localVersionNew + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm-ss")) + ".pmp";
         copyFile(openedFile, new File(historicFolderStr + "/" + newFileName));
-        log.info("Файл перевода скопирован в папку {} c новым названием {}", historicFolderStr, newFileName);
+        log.info("Файл перевода скопирован в папку {} c новым названием {}: {} мс", historicFolderStr, newFileName, getTimeConsumption(timer));
 
-        SystemNotificationUtil.notificationUpdateFromFile("Обновление " + localVersion + " ⮞ " + localVersionNew);
+        notificationUpdateFromFile("Обновление " + localVersion + " ⮞ " + localVersionNew);
 
         deleteOldTraslationFiles(historicFolderStr);
     }
@@ -101,8 +101,8 @@ public class App {
         var versionTagGithub = getVersionFrom(jsonLatestGithubRelease.getString(GITHUB_TAG));
         log.info("Последняя версия с Github: {}", versionTagGithub);
 
-        log.info("Проверка тегов версий: {} ms", getTimeConsumption(timer));
-        timer = System.nanoTime();
+        log.debug("Проверка тегов версий: {} мс", getTimeConsumption(timer));
+        timer = System.currentTimeMillis();
 
         if (!localVersion.equals(versionTagGithub)) {
             final var releaseZipFile = new File(programDir + RELEASE_ZIP);
@@ -110,144 +110,21 @@ public class App {
             runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
 
             downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
-            log.info("Архив новой версии перевода сохранен: {} ms", getTimeConsumption(timer));
-            timer = System.nanoTime();
+            log.info("Архив новой версии перевода сохранен: {} мс", getTimeConsumption(timer));
+            timer = System.currentTimeMillis();
 
             unzip(releaseZipFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME);
-            log.info("Новая версия перевода разархивирована в папку с модами: {} ms", getTimeConsumption(timer));
-            timer = System.nanoTime();
+            log.info("Новая версия перевода разархивирована в папку с модами: {} мс", getTimeConsumption(timer));
+            timer = System.currentTimeMillis();
 
             delete(releaseZipFile);
-            log.info("Архив перевода удален: {} ms", getTimeConsumption(timer));
+            log.info("Архив перевода удален: {} мс", getTimeConsumption(timer));
             log.info("Новая версия перевода: {}", versionTagGithub);
 
             logWhatIsNew(jsonLatestGithubRelease);
-            SystemNotificationUtil.notificationUpdate("Обновление " + localVersion + " ⮞ " + versionTagGithub);
+            notificationUpdate("Обновление " + localVersion + " ⮞ " + versionTagGithub);
 
         } else log.info("Нет новых обновлений");
-    }
-
-    private static void deleteOldLogs(File programDir) {
-        var logDir = new File(programDir + LOG_PATH);
-
-        if (logDir.exists()) {
-            var logFilesArray = logDir.listFiles();
-
-            if (logFilesArray != null && logFilesArray.length > 5) {
-                log.info("Удаление старых логов");
-
-                Stream.of(Objects.requireNonNull(logDir.listFiles()))
-                        .sorted(Comparator.comparingLong(File::lastModified).reversed())
-                        .skip(5)
-                        .forEach(File::delete);
-            }
-        }
-    }
-
-    private static void deleteOldTraslationFiles(String pathToTranslationFolder) {
-        var translationDir = new File(pathToTranslationFolder);
-
-        if (translationDir.exists()) {
-            var translationFilesArray = translationDir.listFiles();
-
-            if (translationFilesArray != null && translationFilesArray.length > 5) {
-                log.info("Удаление старых логов");
-
-                Stream.of(Objects.requireNonNull(translationDir.listFiles()))
-                        .map(file -> new HistoricTranslationFile(file, getTranslationFileExecuteDateTime(
-                                            getFileNameWithoutExtension(file.getName())))
-                        )
-                        .sorted(Comparator.comparing(HistoricTranslationFile::getLocalDateTime).reversed())
-                        .skip(5)
-                        .forEach(hFile -> hFile.getFile().delete());
-            }
-        }
-    }
-
-    private static LocalDateTime getTranslationFileExecuteDateTime(String filename) {
-        return LocalDateTime.parse(filename.substring(filename.length() - 19), DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm-ss"));
-    }
-
-    private static Long getTimeConsumption(long timer) {
-        return (System.currentTimeMillis() - timer);
-    }
-
-    private static void renameAndDeleteOldTranslation(File translationFolder) {
-        long timer = System.nanoTime();
-        var oldTranslationFolder = new File(translationFolder.getParent() + "/" + XIV_RU_FOLDER_NAME + "_old");
-
-        if (!translationFolder.renameTo(oldTranslationFolder)) return;
-
-        try {
-            deleteDirectory(oldTranslationFolder);
-        } catch (IOException e) {
-            log.error(FOLDER_NOT_DELETED);
-            SystemNotificationUtil.notificationError(FOLDER_NOT_DELETED);
-            return;
-        }
-        log.info("Предыдущая версия перевода удалена: {} ms", getTimeConsumption(timer));
-    }
-
-    private static File getTranslationMeta(File translationFolder) {
-        return Arrays.stream(Objects.requireNonNull(translationFolder.listFiles()))
-                .filter(file -> XIV_RU_META_FILE.equals(file.getName()))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("Json файл (" + XIV_RU_META_FILE + ".json) не найден. " +
-                        "Проверьте расположение средства для обновления, либо убедитесь в наличии папки с переводом."));
-    }
-
-    private static File getTranslationFolder(File programDir) {
-        return Arrays.stream(Objects.requireNonNull(programDir.getParentFile().listFiles()))
-                .filter(File::isDirectory)
-                .filter(file -> XIV_RU_FOLDER_NAME.equals(file.getName()))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("Папка с переводом (" + XIV_RU_FOLDER_NAME + ") не найдена. " +
-                        "Проверьте расположение средства для обновления, либо убедитесь в наличии папки с переводом."));
-    }
-
-    public static JSONObject getJsonLatestGithubRelease(String urlFrom) throws IOException, URISyntaxException {
-        try (final var is = URL.of(new URI(urlFrom), null).openStream()) {
-            return new JSONObject(readAll(new InputStreamReader(is, StandardCharsets.UTF_8)));
-        }
-    }
-
-    private static String readAll(Reader rd) throws IOException {
-        final var sb = new StringBuilder();
-        int cp;
-
-        while ((cp = rd.read()) != -1) {
-            sb.append((char) cp);
-        }
-        rd.close();
-
-        return sb.toString();
-    }
-
-    public static void unzip(String source, String destination) throws IOException {
-        try (final var zip = new ZipFile(source)) {
-            zip.extractAll(destination);
-        }
-    }
-
-    public static void downloadTranslationRelease(String urlFrom, Path destination) throws IOException, URISyntaxException {
-        try (final var is = URL.of(new URI(urlFrom), null).openStream()) {
-            Files.copy(is, destination, StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
-    public static void logWhatIsNew(JSONObject jsonLatestGithubRelease) {
-        log.info("_________________________________ \n");
-        log.info("Изменения:");
-
-        Arrays.stream(jsonLatestGithubRelease.getString("body")
-                .replace("**", "")
-                .split("\n"))
-                .filter(str -> str.startsWith("*"))
-                .forEach(log::info);
-
-        log.info("Подробнее о проекте перевода: " + XIV_RUS_SITE);
-        log.info("Об изменениях на Github странице перевода: https://github.com/xivrus/xiv_ru_weblate/releases");
-        log.info("_________________________________ \n");
     }
 
 }

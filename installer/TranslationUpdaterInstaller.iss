@@ -27,6 +27,8 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Files]
 Source: "{#ResourceDir}\target\{#AppName}.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#ResourceDir}\target\README.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#ResourceDir}\target\config.yaml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#ResourceDir}\target\win32\*"; DestDir: "{app}\win32"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]

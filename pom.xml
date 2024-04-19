@@ -25,7 +25,7 @@
     <maven.compiler.target>22</maven.compiler.target>
 
     <!--Прописать путь к ISCC.exe-->
-    <inno.exe.path>D:\Inno Setup 5\ISCC.exe</inno.exe.path>
+    <inno.exe.path>*\Inno Setup 5\ISCC.exe</inno.exe.path>
   </properties>
 
   <dependencies>
@@ -34,6 +34,12 @@
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
       <version>20240303</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>2.2</version>
     </dependency>
 
     <dependency>
@@ -147,6 +153,44 @@
                   <include>deletereg.bat</include>
                   <include>file_type_favicon.ico</include>
                 </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-readme</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}</directory>
+                  <includes>
+                    <include>README.md</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>copy-config</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/main/resources</directory>
+                  <includes>
+                    <include>config.yaml</include>
+                  </includes>
                 </resource>
               </resources>
             </configuration>
