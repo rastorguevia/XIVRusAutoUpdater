@@ -9,6 +9,9 @@ import lombok.*;
 public class ConfigDto {
 
     private int leaveLogsForDays;
-    private int leaveTranslationPmpLast;
+    private int leaveTranslationPmpFiles;
+    private boolean debugUpdate;
+    private boolean allWinNotificationOff;
+    private boolean errWinNotificationOff;
 
 }

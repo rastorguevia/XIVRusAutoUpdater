@@ -1,2 +1,5 @@
 leaveLogsForDays: 5 # Остается * дней логов. Остальное удаляется.
-leaveTranslationPmpLast: 5 # Остается * последних файлов перевода установленных ручным способом.
+leaveTranslationPmpFiles: 5 # Остается * последних файлов перевода установленных ручным способом.
+debugUpdate: false # Всегда обновляем перевод с Github, даже если нет изменений.
+allWinNotificationOff: false
+errWinNotificationOff: false

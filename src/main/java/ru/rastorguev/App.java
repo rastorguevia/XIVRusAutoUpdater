@@ -104,20 +104,20 @@ public class App {
         log.debug("Проверка тегов версий: {} мс", getTimeConsumption(timer));
         timer = System.currentTimeMillis();
 
-        if (!localVersion.equals(versionTagGithub)) {
-            final var releaseZipFile = new File(programDir + RELEASE_ZIP);
+        if (!localVersion.equals(versionTagGithub) || config.isDebugUpdate()) {
+            final var releasePmpFile = new File(programDir + RELEASE_PMP);
 
             runAsync(() -> renameAndDeleteOldTranslation(translationFolder));
 
-            downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releaseZipFile.toPath());
+            downloadTranslationRelease(XIV_RU_LATEST_TRANSLATION_FILE,  releasePmpFile.toPath());
             log.info("Архив новой версии перевода сохранен: {} мс", getTimeConsumption(timer));
             timer = System.currentTimeMillis();
 
-            unzip(releaseZipFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME);
+            unzip(releasePmpFile.getAbsolutePath(), programDir.getParentFile() + "/" + XIV_RU_FOLDER_NAME);
             log.info("Новая версия перевода разархивирована в папку с модами: {} мс", getTimeConsumption(timer));
             timer = System.currentTimeMillis();
 
-            delete(releaseZipFile);
+            delete(releasePmpFile);
             log.info("Архив перевода удален: {} мс", getTimeConsumption(timer));
             log.info("Новая версия перевода: {}", versionTagGithub);
 

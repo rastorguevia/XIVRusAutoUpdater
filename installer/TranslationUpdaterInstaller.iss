@@ -1,26 +1,34 @@
-[Setup]
+#ifndef Version
+  #define Version = '0.0.0.0';
+#endif
 
 #define AppName "TranslationUpdater"
-#define ResourceDir "C:\Users\***\IdeaProjects\ff14-ru-translation-auto-updater"
-; NOTE: Change this variable to your path to the project target folder
+#define ResourceDir "C:\Users\rasto\IdeaProjects\ff14-ru-translation-auto-updater"
 
+[Setup]
 AppId={{45C180A9-C819-4472-AE05-5B4854D40499}
 AppName={#AppName}
-AppVersion=1.0
-;AppVerName={#AppName} 1.0
+AppVersion={#Version}
+AppVerName={#AppName} {#Version}
+VersionInfoVersion={#Version}
 DefaultDirName={pf}\{#AppName}
 DefaultGroupName={#AppName}
 AllowNoIcons=yes
 LicenseFile={#ResourceDir}\installer\license.txt
 InfoBeforeFile={#ResourceDir}\installer\before.txt
 InfoAfterFile={#ResourceDir}\installer\after.txt
+SetupIconFile={#ResourceDir}\target\classes\favicon.ico
+WizardImageFile={#ResourceDir}\installer\WizardImageFile.bmp
+WizardSmallImageFile={#ResourceDir}\installer\WizardSmallImageFile.bmp
 OutputDir={#ResourceDir}\target
 OutputBaseFilename={#AppName}Installer
-SetupIconFile={#ResourceDir}\target\classes\favicon.ico
+
 Compression=lzma
 SolidCompression=yes
 DisableProgramGroupPage=true
 AlwaysRestart=yes
+
+
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"

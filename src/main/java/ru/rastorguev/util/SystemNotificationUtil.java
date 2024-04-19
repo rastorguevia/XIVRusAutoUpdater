@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static ru.rastorguev.dto.constant.Constants.*;
+import static ru.rastorguev.util.FileUtil.config;
 
 @Slf4j
 public class SystemNotificationUtil {
@@ -44,10 +45,14 @@ public class SystemNotificationUtil {
     }
 
     public static void notification(String title, String message, TrayIcon.MessageType messageType) {
+        if (config.isAllWinNotificationOff()) return;
+
         trayIcon.displayMessage(title, message, messageType);
     }
 
     public static void notificationUpdate(String title) {
+        if (config.isAllWinNotificationOff()) return;
+
         trayIcon.addActionListener(_ -> {
             try {
                 Desktop.getDesktop().browse(new URI(XIV_RUS_SITE));
@@ -59,6 +64,8 @@ public class SystemNotificationUtil {
     }
 
     public static void notificationUpdateFromFile(String title) {
+        if (config.isAllWinNotificationOff()) return;
+
         trayIcon.addActionListener(_ -> {
             try {
                 Desktop.getDesktop().open(new File(System.getProperty(PROGRAM_DIR) + TRANSLATION_HISTORY_PATH));
@@ -74,6 +81,8 @@ public class SystemNotificationUtil {
     }
 
     public static void notificationError(String message) {
+        if (config.isAllWinNotificationOff() || config.isErrWinNotificationOff()) return;
+
         trayIcon.addActionListener(_ -> {
             try {
                 Desktop.getDesktop().open(new File(System.getProperty(PROGRAM_DIR) + "/log/app.log"));

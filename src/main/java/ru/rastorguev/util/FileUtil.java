@@ -47,7 +47,7 @@ public class FileUtil {
         if (translationDir.exists()) {
             var translationFilesArray = translationDir.listFiles();
 
-            if (translationFilesArray != null && translationFilesArray.length > config.getLeaveTranslationPmpLast()) {
+            if (translationFilesArray != null && translationFilesArray.length > config.getLeaveTranslationPmpFiles()) {
                 log.info("Удаление старых логов");
 
                 Stream.of(Objects.requireNonNull(translationDir.listFiles()))
@@ -55,7 +55,7 @@ public class FileUtil {
                                 getFileNameWithoutExtension(file.getName())))
                         )
                         .sorted(Comparator.comparing(HistoricTranslationFileDto::getLocalDateTime).reversed())
-                        .skip(config.getLeaveTranslationPmpLast())
+                        .skip(config.getLeaveTranslationPmpFiles())
                         .forEach(hFile -> hFile.getFile().delete());
             }
         }
