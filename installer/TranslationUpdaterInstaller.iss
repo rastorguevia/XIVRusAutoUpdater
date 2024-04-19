@@ -3,7 +3,7 @@
 #endif
 
 #define AppName "TranslationUpdater"
-#define ResourceDir "C:\Users\rasto\IdeaProjects\ff14-ru-translation-auto-updater"
+#define ResourceDir "C:\Users\***\IdeaProjects\ff14-ru-translation-auto-updater"
 
 [Setup]
 AppId={{45C180A9-C819-4472-AE05-5B4854D40499}
