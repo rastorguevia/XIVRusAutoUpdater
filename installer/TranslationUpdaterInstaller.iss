@@ -22,13 +22,10 @@ WizardImageFile={#ResourceDir}\installer\WizardImageFile.bmp
 WizardSmallImageFile={#ResourceDir}\installer\WizardSmallImageFile.bmp
 OutputDir={#ResourceDir}\target
 OutputBaseFilename={#AppName}Installer
-
 Compression=lzma
 SolidCompression=yes
 DisableProgramGroupPage=true
 AlwaysRestart=yes
-
-
 
 [Languages]
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
